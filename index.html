@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=undo" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokemon Battle</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body onload="start()">
+    <div class="background"></div>
+    <div class="container" style="border: solid 5px black;"> <!-- Zastosowanie border do container -->
+        <div class="p1"></div>
+        <div class="p2"></div>
+        <div class="menu">
+            <div class="przyciski">
+                <button onclick="ataki()">Atak</button>
+                <button>Plecak</button>
+                <button>Zmień Pokemona</button>
+                <button>Uciekaj</button>
+            </div>
+            <div class="ataki">
+                <button id="atak1"></button>
+                <button id="atak2"></button>
+                <button id="atak3"></button>
+                <button id="atak4"></button>
+                <span onclick="powracanie()" class="material-symbols-outlined">
+                    undo
+                    </span>
+            </div>  
+        </div>
+    </div>
+</body>
+
+<script src="ap.js"></script>
+
+</html>

@@ -1,0 +1,143 @@
+@import url('https://fonts.googleapis.com/css2?family=Boldonse&display=swap');
+
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('tlo.png');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    filter: blur(4px);
+    z-index: -1; 
+}
+
+.container {
+    position: relative;  /* Zapewnia, że menu będzie w obrębie kontenera */
+    background-image: url('background.png');
+    background-repeat: no-repeat;
+    background-size: cover;
+    width: 900px;
+    height: 800px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    border: solid 5px black;  /* Dodajemy border bezpośrednio do container */
+    box-sizing: border-box;  /* Ważne: obejmuje border i padding */
+}
+
+.p1, .p2 {
+    background-color: none;
+    height: 150px;
+    width: 150px;
+    border-radius: 50%;
+    position: absolute;  /* Używamy absolutnego pozycjonowania */
+}
+
+.p1 {
+    top: 230px;
+    left: 150px; /* Pozycja Pokémona 1 */
+}
+
+.p1 p {
+    position: relative;
+    left: 10%;
+}
+
+.p2 {
+    top: 120px;
+    left: 520px; /* Pozycja Pokémona 2 */
+}
+
+.p2 p {
+    position: relative;
+    left: 10%;
+}
+
+.p1 p, .p2 p {
+    background-color: rgba(255, 255, 255, 0.5);
+    padding: 5px;
+    min-width: 40px;
+    text-align: center;
+    font-family: "Boldonse", system-ui;
+    border-radius: 10%;
+}
+
+.menu {
+    position: absolute;  /* Dzięki temu, menu nie będzie wpływać na wysokość container */
+    bottom: 0; /* Pozycjonowanie względem container, na dole */
+    background-color: rgb(70, 75, 70);
+    width: 100%;  /* Użycie pełnej szerokości kontenera */
+    min-height: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.przyciski {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap; 
+}
+
+.ataki {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap; 
+    z-index: 2;
+    display: none;
+}
+
+.material-symbols-outlined {
+    position: absolute;
+    top: 50%; /* Ustawienie ikony w pionie na środku */
+    left: 50%; /* Ustawienie ikony w poziomie na środku */
+    transform: translate(1050%, 170%); /* Wycentrowanie ikony */
+    z-index: 10; /* Zapewnia, że ikona będzie nad innymi elementami */
+    font-size: 36px; /* Możesz zmienić rozmiar ikony według potrzeby */
+    cursor: pointer; /* Zmienia kursor na wskaźnik, co sugeruje interaktywność */
+    background-color: gray;
+}
+
+button {
+    padding: 30px;
+    background-color: gray;
+    border: none;
+    color: white;
+    width: 200px;
+    font-size: large;
+    font-weight: bold;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+button:hover {
+    padding: 27px;
+    background-color: gray;
+    border: none;
+    color: white;
+    width: 200px;
+    font-size: large;
+    font-weight: bold;
+    height: 100px;
+    border: solid 3px rgb(54, 53, 53);
+    cursor: pointer;
+}
