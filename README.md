@@ -1,2 +1,0 @@
-# pokemon
-projekt pokemon
