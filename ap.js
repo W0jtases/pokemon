@@ -55,18 +55,16 @@ function start() {
         let hp1 = pokemon1.stats.find(stat => stat.stat.name === 'hp').base_stat;
         let hp2 = pokemon2.stats.find(stat => stat.stat.name === 'hp').base_stat;
         obrona1 = pokemon1.stats.find(stat => stat.stat.name === 'defense').base_stat;
-        obrona2 = pokemon2.stats.find(stat => stat.stat.name === 'defense').base_stat; // Zapisujemy w zmiennej globalnej
+        obrona2 = pokemon2.stats.find(stat => stat.stat.name === 'defense').base_stat;
 
         if (legendarne.includes(pokemonId1)) hp1 *= 2.5;
         if (legendarne.includes(pokemonId2)) hp2 *= 2.5;
 
-        // Fetch form information for both Pokémon
         Promise.all([
             fetch(pokemon1.species.url).then(response => response.json()),
             fetch(pokemon2.species.url).then(response => response.json())
         ])
         .then(([species1, species2]) => {
-            // Check if the Pokémon is in its second or third form and apply HP buffs
             if (species1.evolves_from_species) {
                 hp1 *= 2;
             }
@@ -74,12 +72,12 @@ function start() {
                 hp2 *= 2;
             }
 
-            hp1Current = hp1; // Zapisanie aktualnego HP użytkownika
-            hp1Max = hp1; // Maksymalne HP użytkownika
-            userPokemonName = pokemon1.name; // Zapisanie nazwy użytkownika
-            hp2Current = hp2; // Zapisanie aktualnego HP przeciwnika
-            hp2Max = hp2; // Maksymalne HP przeciwnika
-            enemyName = pokemon2.name; // Zapisanie nazwy przeciwnika
+            hp1Current = hp1;
+            hp1Max = hp1;
+            userPokemonName = pokemon1.name;
+            hp2Current = hp2;
+            hp2Max = hp2;
+            enemyName = pokemon2.name;
 
             document.querySelector(".p1").innerHTML = `
                 <p>${pokemon1.name} <br> ${hp1} / ${hp1}</p>
@@ -130,22 +128,19 @@ function start() {
                                 button.style.color = 'white';
                             }
 
-                            // Dodanie event listenera do ataku
                             button.addEventListener("click", function() {
                                 if (canAttack) {
                                     atakPokemonem(attackPower);
                                     canAttack = false;
                                     setTimeout(() => {
-                                        // Enemy attacks after user attack
                                         enemyAttack();
-                                    }, 2000); // 2 seconds delay
+                                    }, 2000);
                                 }
                             });
                         }
                     });
             });
 
-            // Call the function to fetch and log enemy attacks
             losoweAtakiPrzeciwnika(pokemon2);
         })
         .catch(error => console.error("Error fetching Pokémon species data:", error));
@@ -162,18 +157,16 @@ function changePokemon() {
             let hp1 = pokemon.stats.find(stat => stat.stat.name === 'hp').base_stat;
             obrona1 = pokemon.stats.find(stat => stat.stat.name === 'defense').base_stat;
 
-            // Fetch form information for the new Pokémon
             fetch(pokemon.species.url)
                 .then(response => response.json())
                 .then(species => {
-                    // Check if the Pokémon is in its second or third form and apply HP buffs
                     if (species.evolves_from_species) {
                         hp1 *= 2;
                     }
 
-                    hp1Current = hp1; // Zapisanie aktualnego HP użytkownika
-                    hp1Max = hp1; // Maksymalne HP użytkownika
-                    userPokemonName = pokemon.name; // Zapisanie nazwy użytkownika
+                    hp1Current = hp1;
+                    hp1Max = hp1;
+                    userPokemonName = pokemon.name;
 
                     document.querySelector(".p1").innerHTML = `
                         <p>${pokemon.name} <br> ${hp1} / ${hp1}</p>
@@ -219,15 +212,13 @@ function changePokemon() {
                                         button.style.color = 'white';
                                     }
 
-                                    // Dodanie event listenera do ataku
                                     button.addEventListener("click", function() {
                                         if (canAttack) {
                                             atakPokemonem(attackPower);
                                             canAttack = false;
                                             setTimeout(() => {
-                                                // Enemy attacks after user attack
                                                 enemyAttack();
-                                            }, 2000); // 2 seconds delay
+                                            }, 2000);
                                         }
                                     });
                                 }
@@ -242,7 +233,6 @@ function changePokemon() {
 function losoweAtakiPrzeciwnika(pokemonId2) {
     let randomAttackIndices = [];
 
-    // Losujemy 4 unikalne ataki przeciwnika
     for (let i = 0; i < 4; i++) {
         let randomIndex = Math.floor(Math.random() * pokemonId2.moves.length);
         while (randomAttackIndices.includes(randomIndex)) {
@@ -251,12 +241,11 @@ function losoweAtakiPrzeciwnika(pokemonId2) {
         randomAttackIndices.push(randomIndex);
     }
 
-    // Pobieramy dane ataków
     Promise.all(
         randomAttackIndices.map(index => fetch(pokemonId2.moves[index].move.url).then(res => res.json()))
     ).then(movesData => {
         enemyAttacks = movesData
-            .filter(moveData => moveData.power !== null) // Filter out status moves
+            .filter(moveData => moveData.power !== null)
             .map(moveData => ({
                 name: moveData.name,
                 type: moveData.type.name,
@@ -264,21 +253,18 @@ function losoweAtakiPrzeciwnika(pokemonId2) {
                 category: moveData.damage_class.name
             }));
 
-        console.log("Ataki przeciwnika:", enemyAttacks); // Wydruk w konsoli
+        console.log("Ataki przeciwnika:", enemyAttacks);
     }).catch(error => console.error("Błąd pobierania ataków przeciwnika:", error));
 }
 
-// 🛡️ Funkcja do odejmowania HP przeciwnika
 function atakPokemonem(damage) {
-    let finalDamage = damage - obrona2 / 4; // Obrona przeciwnika redukuje obrażenia
-    if (finalDamage < 0) finalDamage = 0; // Nie pozwalamy na leczenie przeciwnika poprzez zbyt dużą obronę
+    let finalDamage = damage - obrona2 / 4;
+    if (finalDamage < 0) finalDamage = 0;
 
-    hp2Current -= finalDamage; // Odejmujemy obrażenia od HP przeciwnika
+    hp2Current -= finalDamage;
 
-    // Upewnienie się, że HP nie jest poniżej 0
-    if (hp2Current < 0) hp2Current = 0 ;
+    if (hp2Current < 0) hp2Current = 0;
 
-    // Aktualizacja wyświetlanego HP przeciwnika
     document.querySelector("#hp2-display").innerHTML = `${enemyName}<br>${hp2Current} / ${hp2Max}`;
 
     console.log(`Przeciwnik otrzymał ${finalDamage} obrażeń! Pozostałe HP: ${hp2Current}`);
@@ -288,19 +274,16 @@ function atakPokemonem(damage) {
     }
 }
 
-// 🛡️ Funkcja do odejmowania HP użytkownika
 function enemyAttack() {
     if (enemyAttacks.length > 0) {
         let randomAttack = enemyAttacks[Math.floor(Math.random() * enemyAttacks.length)];
-        let finalDamage = randomAttack.power - obrona1 / 4; // Obrona użytkownika redukuje obrażenia
-        if (finalDamage < 0) finalDamage = 0; // Nie pozwalamy na leczenie użytkownika poprzez zbyt dużą obronę
+        let finalDamage = randomAttack.power - obrona1 / 4;
+        if (finalDamage < 0) finalDamage = 0;
 
-        hp1Current -= finalDamage; // Odejmujemy obrażenia od HP użytkownika
+        hp1Current -= finalDamage;
 
-        // Upewnienie się, że HP nie jest poniżej 0
         if (hp1Current < 0) hp1Current = 0;
 
-        // Aktualizacja wyświetlanego HP użytkownika
         document.querySelector(".p1 p").innerHTML = `${userPokemonName}<br>${hp1Current} / ${hp1Max}`;
 
         console.log(`Użytkownik otrzymał ${finalDamage} obrażeń! Pozostałe HP: ${hp1Current}`);
@@ -309,7 +292,6 @@ function enemyAttack() {
             alert("Przegrałeś!");
         }
 
-        // Allow user to attack again after enemy attack
         canAttack = true;
     }
 }
@@ -335,62 +317,54 @@ function powracanie2() {
 }
 
 function hyperpotion() {
-    // Hide the plecak div
     document.querySelector('.plecak').style.display = "none";
 
-    // Add 90 HP to p1 but not exceeding the max HP
     hp1Current = Math.min(hp1Current + 90, hp1Max);
 
-    // Update the displayed HP
     document.querySelector(".p1 p").innerHTML = `${userPokemonName}<br>${hp1Current} / ${hp1Max}`;
 
-    // Show the przyciski div
     document.querySelector('.przyciski').style.display = "flex";
 
-    // Make it p2's turn to attack
     canAttack = false;
     setTimeout(() => {
         enemyAttack();
-    }, 2000); // 2 seconds delay
+    }, 2000);
 }
 
 function runAway() {
-    // Roll a random number between 1 and 649
     let newPokemonId = Math.floor(Math.random() * 649) + 1;
 
-    // Fetch the new Pokémon data
     fetch(`https://pokeapi.co/api/v2/pokemon/${newPokemonId}`)
         .then(response => response.json())
         .then(pokemon => {
             let hp2 = pokemon.stats.find(stat => stat.stat.name === 'hp').base_stat;
             obrona2 = pokemon.stats.find(stat => stat.stat.name === 'defense').base_stat;
 
-            // Fetch form information for the new Pokémon
             fetch(pokemon.species.url)
                 .then(response => response.json())
                 .then(species => {
-                    // Check if the Pokémon is in its second or third form and apply HP buffs
                     if (species.evolves_from_species) {
                         hp2 *= 2;
                     }
 
-                    hp2Current = hp2; // Zapisanie aktualnego HP przeciwnika
-                    hp2Max = hp2; // Maksymalne HP przeciwnika
-                    enemyName = pokemon.name; // Zapisanie nazwy przeciwnika
+                    hp2Current = hp2;
+                    hp2Max = hp2;
+                    enemyName = pokemon.name;
 
                     document.querySelector(".p2").innerHTML = `
                         <p id="hp2-display">${enemyName} <br> ${hp2Current} / ${hp2Max}</p>
                         <img src="${pokemon.sprites.other["showdown"].front_default}" style="width: 100%; height: 100%;">
                     `;
 
-                    // Call the function to fetch and log enemy attacks
                     losoweAtakiPrzeciwnika(pokemon);
+
+                    // Allow the player to attack after running away
+                    canAttack = true;
                 })
                 .catch(error => console.error("Error fetching Pokémon species data:", error));
         })
         .catch(error => console.error("Error fetching new Pokémon data:", error));
 }
-
 
 document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("change-pokemon-button").addEventListener("click", changePokemon);
