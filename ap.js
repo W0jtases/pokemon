@@ -1,105 +1,144 @@
+let hp2Current; // Aktualne HP przeciwnika
+let hp2Max; // Maksymalne HP przeciwnika
+let enemyName; // Imię przeciwnika
+let obrona2; // Obrona przeciwnika
+
 function start() {
-    // Losowanie dwóch różnych Pokémonów
-    let pokemonId1 = Math.floor(Math.random() * 649) + 1;  // Losowy Pokémon 1
-    let pokemonId2 = Math.floor(Math.random() * 649) + 1;  // Losowy Pokémon 2
-    // Pobranie danych o Pokémonach z API
+    const legendarne = [144, 145, 146, 150, 151, 243, 244, 245, 249, 250, 251, 377, 378, 379, 380, 381, 382, 383, 384, 385, 386, 480, 481, 482, 483, 484, 485, 486, 487, 488, 489, 490, 491, 492, 493, 494, 638, 639, 640, 641, 642, 643, 644, 645, 646, 647];
+    let pokemonId1 = Math.floor(Math.random() * 649) + 1;
+    let pokemonId2 = Math.floor(Math.random() * 649) + 1;
+
     Promise.all([
         fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonId1}`).then(response => response.json()),
         fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonId2}`).then(response => response.json())
     ])
-        .then(([pokemon1, pokemon2]) => {
-            // Ustawienie obrazu dla p2 (przedni obrazek)
-            document.querySelector(".p2").innerHTML = `
-            <p>
-                ${pokemon2.name} <br>
-                ${pokemon2.stats.find(stat => stat.stat.name === 'hp').base_stat} / ${pokemon2.stats.find(stat => stat.stat.name === 'hp').base_stat}
-            </p>
-            <img
-                src="${pokemon2.sprites.other["showdown"].front_default}"
-                style="width: 100%; height: 100%;">
+    .then(([pokemon1, pokemon2]) => {
+        let hp1 = pokemon1.stats.find(stat => stat.stat.name === 'hp').base_stat;
+        let hp2 = pokemon2.stats.find(stat => stat.stat.name === 'hp').base_stat;
+        let obrona1 = pokemon1.stats.find(stat => stat.stat.name === 'defense').base_stat;
+        obrona2 = pokemon2.stats.find(stat => stat.stat.name === 'defense').base_stat; // Zapisujemy w zmiennej globalnej
+        
+        if (legendarne.includes(pokemonId1)) hp1 *= 2.5;
+        if (legendarne.includes(pokemonId2)) hp2 *= 2.5;
+
+        hp2Current = hp2; // Zapisanie aktualnego HP przeciwnika
+        hp2Max = hp2; // Maksymalne HP przeciwnika
+        enemyName = pokemon2.name; // Zapisanie nazwy przeciwnika
+
+        document.querySelector(".p1").innerHTML = `
+            <p>${pokemon1.name} <br> ${hp1} / ${hp1}</p>
+            <img src="${pokemon1.sprites.other["showdown"].back_default}" style="width: 100%; height: 100%;">
         `;
 
-            // Ustawienie obrazu dla p1 (tylny obrazek)
-            document.querySelector(".p1").innerHTML = `
-            <p>
-                ${pokemon1.name} <br>
-                ${pokemon1.stats.find(stat => stat.stat.name === 'hp').base_stat} / ${pokemon1.stats.find(stat => stat.stat.name === 'hp').base_stat}
-            </p>
-            <img
-                src="${pokemon1.sprites.other["showdown"].back_default}"
-                style="width: 100%; height: 100%;">
+        document.querySelector(".p2").innerHTML = `
+            <p id="hp2-display">${enemyName} <br> ${hp2Current} / ${hp2Max}</p>
+            <img src="${pokemon2.sprites.other["showdown"].front_default}" style="width: 100%; height: 100%;">
         `;
 
-            // Zmienna do przechowywania tylko ataków z mocą
-            let attackCount = 0;
+        let attackCount = 0;
+        let randomAttackIndices = [];
 
-            // Tablica, która będzie przechowywać ataki
-            let attackData = [];
-
-            // Losowanie 4 ataków Pokémonów (można losować je w zakresie 0-30)
-            let randomAttackIndices = [];
-            for (let i = 0; i < 4; i++) {
-                let randomIndex = Math.floor(Math.random() * pokemon1.moves.length);
-                while (randomAttackIndices.includes(randomIndex)) {
-                    randomIndex = Math.floor(Math.random() * pokemon1.moves.length);
-                }
-                randomAttackIndices.push(randomIndex);
+        for (let i = 0; i < 4; i++) {
+            let randomIndex = Math.floor(Math.random() * pokemon1.moves.length);
+            while (randomAttackIndices.includes(randomIndex)) {
+                randomIndex = Math.floor(Math.random() * pokemon1.moves.length);
             }
+            randomAttackIndices.push(randomIndex);
+        }
 
-            // Sprawdzanie ataków Pokémonów
-            randomAttackIndices.forEach((index) => {
-                let move = pokemon1.moves[index];  // Wybieramy atak na podstawie wylosowanego indeksu
-                fetch(move.move.url)
-                    .then(response => response.json())
-                    .then(moveData => {
-                        const attackType = moveData.type.name;  // Typ ataku
-                        const attackPower = moveData.power;  // Moc ataku (ilość obrażeń)
-                        const attackCategory = moveData.damage_class.name;  // Kategoria ataku (physical, special, status)
+let enemyAttacks = []; // Przechowywanie ataków przeciwnika
 
-                        // Filtrujemy tylko ataki, które mają kategorię "physical" lub "special" oraz moc większą niż 0
-                        if (attackPower !== null && attackPower > 0) {
-                            // Zapisz typ ataku, moc i kategorię
-                            attackData.push({
-                                name: moveData.name,
-                                type: attackType,
-                                power: attackPower,
-                                category: attackCategory
-                            });
+function losoweAtakiPrzeciwnika(pokemonId2) {
+    let randomAttackIndices = [];
 
-                            // Zwiększ licznik ataków
-                            attackCount++;
+    // Losujemy 4 unikalne ataki przeciwnika
+    for (let i = 0; i < 4; i++) {
+        let randomIndex = Math.floor(Math.random() * pokemonId2.moves.length);
+        while (randomAttackIndices.includes(randomIndex)) {
+            randomIndex = Math.floor(Math.random() * pokemonId2.moves.length);
+        }
+        randomAttackIndices.push(randomIndex);
+    }
 
-                            // Wyświetlanie ataków, typów, mocy i kategorii
-                            document.querySelector(`#atak${attackCount}`).innerHTML = `
-                               ${moveData.name} <br> 
-                               ${attackType} <br> 
-                                ${attackPower} <br> 
-                               ${attackCategory}
-                            `;
-                        }
-                    });
-            });
+    // Pobieramy dane ataków
+    Promise.all(
+        randomAttackIndices.map(index => fetch(pokemonId2.moves[index].move.url).then(res => res.json()))
+    ).then(movesData => {
+        enemyAttacks = movesData.map(moveData => ({
+            name: moveData.name,
+            type: moveData.type.name,
+            power: moveData.power,
+            category: moveData.damage_class.name
+        }));
 
-        })
-        .catch((error) => {
-            console.error("Error fetching Pokémon data:", error);
-            document.querySelector(".p1").innerHTML = `<p>Pokémon not found. Please try again.</p>`;
-            document.querySelector(".p2").innerHTML = `<p>Pokémon not found. Please try again.</p>`;
-        });
+        console.log("Ataki przeciwnika:", enemyAttacks); // Wydruk w konsoli
+    }).catch(error => console.error("Błąd pobierania ataków przeciwnika:", error));
 }
 
-function ataki() {
-    let menu = document.getElementsByClassName('przyciski')[0];
-    let ataki = document.getElementsByClassName('ataki')[0];
+console.log(pokemon2.moves);  // Sprawdzenie, czy mamy dane o atakach
 
-    menu.style.display = "none";
-    ataki.style.display = "flex";
+
+        randomAttackIndices.forEach((index) => {
+            let move = pokemon1.moves[index];
+            fetch(move.move.url)
+                .then(response => response.json())
+                .then(moveData => {
+                    const attackType = moveData.type.name;
+                    const attackPower = moveData.power;
+                    const attackCategory = moveData.damage_class.name;
+
+                    if (attackPower !== null && attackPower > 0) {
+                        attackCount++;
+
+                        let button = document.querySelector(`#atak${attackCount}`);
+                        button.innerHTML = `
+                            <div style="display: flex; flex-direction: column; align-items: center;">
+                                <strong>${moveData.name}</strong>
+                                <span>${attackType}</span>
+                                <span class="damage">${attackPower}</span>
+                                <span>${attackCategory}</span>
+                            </div>
+                        `;
+
+                        // Dodanie event listenera do ataku
+                        button.addEventListener("click", function() {
+                            atakPokemonem(attackPower);
+                        });
+                    }
+                });
+        });
+    })
+    .catch(error => console.error("Error fetching Pokémon data:", error));
+}
+
+// 🛡️ Funkcja do odejmowania HP przeciwnika
+function atakPokemonem(damage) {
+    let finalDamage = damage - obrona2 / 4; // Obrona przeciwnika redukuje obrażenia
+    if (finalDamage < 0) finalDamage = 0; // Nie pozwalamy na leczenie przeciwnika poprzez zbyt dużą obronę
+
+    hp2Current -= finalDamage; // Odejmujemy obrażenia od HP przeciwnika
+
+    // Upewnienie się, że HP nie jest poniżej 0
+    if (hp2Current < 0) hp2Current = 0 ;
+
+    // Aktualizacja wyświetlanego HP przeciwnika
+    document.querySelector("#hp2-display").innerHTML = `${enemyName}<br>${hp2Current} / ${hp2Max}`;
+
+    console.log(`Przeciwnik otrzymał ${finalDamage} obrażeń! Pozostałe HP: ${hp2Current}`);
+
+    if (hp2Current <= 0) {
+        alert("Wygrałeś!");
+    }
+}
+
+
+
+function ataki() {
+    document.querySelector('.przyciski').style.display = "none";
+    document.querySelector('.ataki').style.display = "flex";
 }
 
 function powracanie() {
-    let menu = document.getElementsByClassName('przyciski')[0];
-    let ataki = document.getElementsByClassName('ataki')[0];
-
-    menu.style.display = "flex";
-    ataki.style.display = "none";
+    document.querySelector('.przyciski').style.display = "flex";
+    document.querySelector('.ataki').style.display = "none";
 }
