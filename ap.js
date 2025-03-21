@@ -1,13 +1,13 @@
-let hp2Current; // Aktualne HP przeciwnika
-let hp2Max; // Maksymalne HP przeciwnika
-let enemyName; // Imię przeciwnika
-let obrona2; // Obrona przeciwnika
-let enemyAttacks = []; // Przechowywanie ataków przeciwnika
-let canAttack = true; // Flaga do kontrolowania możliwości ataku
-let hp1Current; // Aktualne HP użytkownika
-let hp1Max; // Maksymalne HP użytkownika
-let obrona1; // Obrona użytkownika
-let userPokemonName; // Imię użytkownika
+let hp2Current;
+let hp2Max;
+let enemyName;
+let obrona2;
+let enemyAttacks = [];
+let canAttack = true;
+let hp1Current;
+let hp1Max;
+let obrona1;
+let userPokemonName;
 
 const typeColors = {
     grass: 'green',
@@ -354,8 +354,46 @@ function hyperpotion() {
     }, 2000); // 2 seconds delay
 }
 
-// Add event listener for the "Change Pokémon" button after DOM is fully loaded
+function runAway() {
+    // Roll a random number between 1 and 649
+    let newPokemonId = Math.floor(Math.random() * 649) + 1;
+
+    // Fetch the new Pokémon data
+    fetch(`https://pokeapi.co/api/v2/pokemon/${newPokemonId}`)
+        .then(response => response.json())
+        .then(pokemon => {
+            let hp2 = pokemon.stats.find(stat => stat.stat.name === 'hp').base_stat;
+            obrona2 = pokemon.stats.find(stat => stat.stat.name === 'defense').base_stat;
+
+            // Fetch form information for the new Pokémon
+            fetch(pokemon.species.url)
+                .then(response => response.json())
+                .then(species => {
+                    // Check if the Pokémon is in its second or third form and apply HP buffs
+                    if (species.evolves_from_species) {
+                        hp2 *= 2;
+                    }
+
+                    hp2Current = hp2; // Zapisanie aktualnego HP przeciwnika
+                    hp2Max = hp2; // Maksymalne HP przeciwnika
+                    enemyName = pokemon.name; // Zapisanie nazwy przeciwnika
+
+                    document.querySelector(".p2").innerHTML = `
+                        <p id="hp2-display">${enemyName} <br> ${hp2Current} / ${hp2Max}</p>
+                        <img src="${pokemon.sprites.other["showdown"].front_default}" style="width: 100%; height: 100%;">
+                    `;
+
+                    // Call the function to fetch and log enemy attacks
+                    losoweAtakiPrzeciwnika(pokemon);
+                })
+                .catch(error => console.error("Error fetching Pokémon species data:", error));
+        })
+        .catch(error => console.error("Error fetching new Pokémon data:", error));
+}
+
+
 document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("change-pokemon-button").addEventListener("click", changePokemon);
+    document.getElementById("run-away-button").addEventListener("click", runAway);
 });
 
