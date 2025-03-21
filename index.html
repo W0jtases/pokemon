@@ -11,14 +11,26 @@
 
 <body onload="start()">
     <div class="background"></div>
-    <div class="container" style="border: solid 5px black;"> <!-- Zastosowanie border do container -->
+    <div class="container" style="border: solid 5px black;">    
+        <div class="plecak">
+            <div class="przedmiot1" onclick="hyperpotion()">
+                <img src="hyperpotion.png">
+            <div class="opis">
+                <p>Hyper potion</p>
+            </div>
+            
+        </div>
+        <span onclick="powracanie2()" class="material-symbols-outlined">
+            undo
+            </span> 
+        </div>
         <div class="p1"></div>
         <div class="p2"></div>
         <div class="menu">
             <div class="przyciski">
                 <button onclick="ataki()">Atak</button>
-                <button>Plecak</button>
-                <button>Zmień Pokemona</button>
+                <button onclick="plecak()">Plecak</button>
+                <button id="change-pokemon-button">Zmień Pokemona</button>
                 <button>Uciekaj</button>
             </div>
             <div class="ataki">
