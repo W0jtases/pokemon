@@ -8,6 +8,8 @@ let hp1Current;
 let hp1Max;
 let obrona1;
 let userPokemonName;
+let p1Type;
+let p2Type;
 
 const typeColors = {
     grass: 'green',
@@ -27,6 +29,13 @@ const typeColors = {
     dark: 'black',
     steel: 'silver',
     fairy: 'lightpink'
+};
+
+const typeEffectiveness = {
+    fire: { grass: 2, ice: 2, bug:2, steel: 2, rock: 0.5, dragon: 0.5, water: 0.5, fire: 0.5 },
+    grass: { water: 2, ground: 2, fly: 0.5, bug: 0.5, fire: 0.5, grass: 0.5, poison: 0.5,  },
+    water: { fire: 2, grass: 0.5, water: 0.5 },
+    // Add other types as needed -----------------------------------------------------------
 };
 
 function isBrightColor(color) {
@@ -78,6 +87,8 @@ function start() {
             hp2Current = hp2;
             hp2Max = hp2;
             enemyName = pokemon2.name;
+            p1Type = pokemon1.types[0].type.name;
+            p2Type = pokemon2.types[0].type.name;
 
             document.querySelector(".p1").innerHTML = `
                 <p>${pokemon1.name} <br> ${hp1} / ${hp1}</p>
@@ -130,7 +141,7 @@ function start() {
 
                             button.addEventListener("click", function() {
                                 if (canAttack) {
-                                    atakPokemonem(attackPower);
+                                    atakPokemonem(attackPower, attackType);
                                     canAttack = false;
                                     setTimeout(() => {
                                         enemyAttack();
@@ -167,6 +178,7 @@ function changePokemon() {
                     hp1Current = hp1;
                     hp1Max = hp1;
                     userPokemonName = pokemon.name;
+                    p1Type = pokemon.types[0].type.name;
 
                     document.querySelector(".p1").innerHTML = `
                         <p>${pokemon.name} <br> ${hp1} / ${hp1}</p>
@@ -214,7 +226,7 @@ function changePokemon() {
 
                                     button.addEventListener("click", function() {
                                         if (canAttack) {
-                                            atakPokemonem(attackPower);
+                                            atakPokemonem(attackPower, attackType);
                                             canAttack = false;
                                             setTimeout(() => {
                                                 enemyAttack();
@@ -257,8 +269,9 @@ function losoweAtakiPrzeciwnika(pokemonId2) {
     }).catch(error => console.error("Błąd pobierania ataków przeciwnika:", error));
 }
 
-function atakPokemonem(damage) {
-    let finalDamage = damage - obrona2 / 4;
+function atakPokemonem(damage, attackType) {
+    let effectiveness = typeEffectiveness[attackType] && typeEffectiveness[attackType][p2Type] || 1;
+    let finalDamage = damage * effectiveness - obrona2 / 4;
     if (finalDamage < 0) finalDamage = 0;
 
     hp2Current -= finalDamage;
@@ -277,7 +290,8 @@ function atakPokemonem(damage) {
 function enemyAttack() {
     if (enemyAttacks.length > 0) {
         let randomAttack = enemyAttacks[Math.floor(Math.random() * enemyAttacks.length)];
-        let finalDamage = randomAttack.power - obrona1 / 4;
+        let effectiveness = typeEffectiveness[randomAttack.type] && typeEffectiveness[randomAttack.type][p1Type] || 1;
+        let finalDamage = randomAttack.power * effectiveness - obrona1 / 4;
         if (finalDamage < 0) finalDamage = 0;
 
         hp1Current -= finalDamage;
@@ -350,6 +364,7 @@ function runAway() {
                     hp2Current = hp2;
                     hp2Max = hp2;
                     enemyName = pokemon.name;
+                    p2Type = pokemon.types[0].type.name;
 
                     document.querySelector(".p2").innerHTML = `
                         <p id="hp2-display">${enemyName} <br> ${hp2Current} / ${hp2Max}</p>
@@ -358,7 +373,6 @@ function runAway() {
 
                     losoweAtakiPrzeciwnika(pokemon);
 
-                    // Allow the player to attack after running away
                     canAttack = true;
                 })
                 .catch(error => console.error("Error fetching Pokémon species data:", error));
